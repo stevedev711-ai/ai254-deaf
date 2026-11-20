@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 project(ai254)
+# Unoptimised whisper.cpp is far too slow to caption in real time, so compile
+# the native code optimised even in debug APKs.
+set(CMAKE_BUILD_TYPE Release)
 include(FetchContent)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

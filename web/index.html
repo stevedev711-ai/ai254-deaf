@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI254 Classroom Access</title>
+<meta name="description" content="AI254 gives Deaf and hard-of-hearing students in Kenya offline lecture captions and a sensor glove that reads classroom signs aloud.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">AI254 · Kenya</p>
+    <h1>Lecture captions and classroom signing for Deaf and hard-of-hearing students</h1>
+    <p class="lede">An Android app that captions the lecturer in English or Swahili without internet, and a sensor glove that turns a small set of Kenyan Sign Language (KSL) signs into spoken phrases, only after the student confirms them.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/stevedev711-ai/ai254-deaf/releases/latest/download/AI254-debug.apk">Download Android app (APK)</a>
+      <a class="btn" href="https://github.com/stevedev711-ai/ai254-deaf">Source code on GitHub</a>
+    </div>
+    <p class="fine">Debug build for testing. Needs an Android 13 or newer phone with a 64-bit ARM processor.</p>
+  </div>
+</header>
+
+<main>
+  <section class="wrap" id="demo" aria-labelledby="demo-title">
+    <h2 id="demo-title">Try the sign reader</h2>
+    <p class="note"><strong>This is a simulation.</strong> There is no glove connected. The page invents two seconds of sensor readings and runs a classifier with the same design as the app's. That classifier was trained on simulated data, not real KSL, so it shows how the system works, not how well it recognises real signs.</p>
+
+    <div class="demo">
+      <div class="panel controls">
+        <label for="sign">What should the simulated hand do?</label>
+        <select id="sign">
+          <option value="hello">Sign “hello”</option>
+          <option value="thank you">Sign “thank you”</option>
+          <option value="question">Sign “question”</option>
+          <option value="repeat">Sign “repeat”</option>
+          <option value="near">Something close, but wrong</option>
+          <option value="rest">Rest the hand</option>
+        </select>
+        <button id="read" class="btn primary">Read one sign</button>
+        <div id="result" class="result" role="status" aria-live="polite">
+          <span class="muted">Press “Read one sign” to start.</span>
+        </div>
+        <button id="speak" class="btn" disabled>Speak recognised phrase</button>
+        <p class="fine">The app never speaks automatically. The student checks the phrase on screen first, then chooses to speak it.</p>
+      </div>
+
+      <div class="panel sensors">
+        <h3>Finger bend</h3>
+        <div class="fingers" id="fingers"></div>
+        <h3>Hand movement</h3>
+        <canvas id="motion" height="150" aria-label="Acceleration over the two-second window"></canvas>
+        <div class="legend"><span><i class="k x"></i>side to side</span><span><i class="k y"></i>forward and back</span><span><i class="k z"></i>up and down</span></div>
+        <h3>Classifier confidence</h3>
+        <div id="probs" class="probs"></div>
+        <p class="fine">Phrases below the 85% line are rejected as unclear rather than guessed.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="how-title">
+    <h2 id="how-title">How it works</h2>
+    <div class="cards">
+      <article class="card">
+        <h3>Captions</h3>
+        <p>The phone listens to the lecturer and transcribes speech with whisper.cpp on the device, in English or Swahili. Audio is processed in four-second chunks and never leaves the phone. The app has no internet permission.</p>
+      </article>
+      <article class="card">
+        <h3>The glove</h3>
+        <p>An ESP32 board reads five flex sensors (one per finger) and an MPU-6050 motion sensor 20 times a second and sends them to the phone over Bluetooth Low Energy.</p>
+      </article>
+      <article class="card">
+        <h3>Sign reading</h3>
+        <p>When the student taps <em>Read one sign</em>, the app collects two seconds of readings and runs a small TensorFlow Lite model. Unclear or unsupported signs are rejected, and the result is spoken with an offline voice only when the student confirms it.</p>
+      </article>
+      <article class="card">
+        <h3>Training</h3>
+        <p>Teams record repeated examples from several consenting signers, review the vocabulary with KSL users, and test on signers the model has never seen before using it in class.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="start-title">
+    <h2 id="start-title">Get it running</h2>
+    <ol class="steps">
+      <li><strong>Install the app.</strong> Download the APK above on an Android 13+ phone and allow installing from your browser when Android asks.</li>
+      <li><strong>Add a speech model.</strong> Download a multilingual whisper.cpp model (Small is a good start) from the <a href="https://github.com/ggml-org/whisper.cpp/blob/master/models/README.md">official model list</a>, then use <em>Import Whisper model</em> in the app.</li>
+      <li><strong>Add an offline voice.</strong> Install English text-to-speech data in Android settings and check it works in airplane mode.</li>
+      <li><strong>Build and train the glove.</strong> Follow the wiring table and training steps in the <a href="https://github.com/stevedev711-ai/ai254-deaf#readme">README</a>, then import <code>ksl.tflite</code> and <code>labels.txt</code> into the app.</li>
+    </ol>
+  </section>
+
+  <section class="wrap" aria-labelledby="limits-title">
+    <h2 id="limits-title">What it can't do yet</h2>
+    <ul class="limits">
+      <li>The glove reads finger bends and hand movement only. It misses facial expressions and the other hand, so it can't translate KSL in general — only a small, reviewed classroom vocabulary.</li>
+      <li>Caption speed depends on the phone. Measure the delay on the actual device before relying on it in a lecture.</li>
+      <li>The reference glove's Bluetooth link is unencrypted. Add authenticated pairing before using it outside a controlled setting.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <p>AI254 reference build · <a href="https://github.com/stevedev711-ai/ai254-deaf">GitHub</a></p>
+</footer>
+<script src="classifier.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
