@@ -1,0 +1,15 @@
+plugins { id 'com.android.application' version '8.7.3' }
+android {
+    namespace 'ke.ai254'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'ke.ai254'
+        minSdk 33
+        targetSdk 35
+        versionCode 1
+        versionName '0.1'
+        ndk { abiFilters 'arm64-v8a', 'x86_64' }
+    }
+    externalNativeBuild { cmake { path 'src/main/cpp/CMakeLists.txt'; version '3.22.1' } }
+}
+dependencies { implementation 'org.tensorflow:tensorflow-lite:2.16.1' }
